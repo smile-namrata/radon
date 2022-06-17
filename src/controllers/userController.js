@@ -6,8 +6,8 @@ const userModel = require("../models/userModel");
 
 const createUser = async function (abcd, xyz) {
   try { 
-    let data = abcd.body;
-    let savedData = await userModel.create(data);
+    let tata = abcd.body;
+    let savedData = await userModel.create(tata);
     xyz.status(201).send({ msg: savedData, });
   }
   catch (err) {

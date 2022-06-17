@@ -10,7 +10,7 @@ router.get("/test-me", function (req, res) {
 
 // ========[Post]==========
 
-router.post("/users", userController.createUser  )
+router.post("/Hyder", userController.createUser  )
 
 router.post("/login", userController.loginUser)
 
