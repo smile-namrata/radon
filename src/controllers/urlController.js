@@ -1,4 +1,4 @@
-const { model } = require("mongoose")
+const mongoose = require("mongoose")
 const urlModel = require("../models/urlModel")
 const shortid = require('shortid')
 
@@ -19,7 +19,7 @@ const createUrl = async function(req,res){
     return res.status(400).send({status: false , message: "Url is invalid"})
    }
  
-        let urlDecodedCode = shortid.generate(data)
+        let urlDecodedCode = shortid.generate()
         let shortDecodedUrl = "https://localhost:3000/"+urlDecodedCode
         data.shortUrl = shortDecodedUrl
         data['urlCode'] = urlDecodedCode
@@ -34,20 +34,24 @@ const createUrl = async function(req,res){
    
 const getUrl = async function(req,res){
 
-    let code = req.params.urlCode
-    if(!code){
-        return res.status(400).send({status:false, message: "Please provide urlCode"})
-    }
-    if(!shortid.isValid(code)){
-        return res.status(400).send({status:false,msg:"Invalid Code"})
-    }
-    let getLongUrl = await urlModel.findOne({urlCode:code}).select({_id:0,longUrl:1})
-    if(!getLongUrl){
-        return res.status(404).send({status:false,message:"No Url Found"})
-    }
+try{
+        let code = req.params.urlCode
 
-    res.status(302).send("Redirect to " + getLongUrl.longUrl.toString())
+        if(!shortid.isValid(code)){
+            return res.status(400).send({status:false,message:"Invalid Code"})
+        }
 
+        let getLongUrl = await urlModel.findOne({urlCode:code}).select({_id:0,longUrl:1})
+        if(!getLongUrl){
+            return res.status(404).send({status:false,message:"No Url Found"})
+        }
+
+        return res.status(302).send("Redirect to " + getLongUrl.longUrl)
+    }
+    catch(err){
+        return res.status(500).send({status:false,message:err.message})
+
+    }
 }
 
 module.exports = {createUrl,getUrl}
