@@ -14,11 +14,16 @@ const createUrl = async function(req,res){
         }
         var urlPattern = /^(http(s)?:\/\/)?(www.)?([a-zA-Z0-9])+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,5}(:[0-9]{1,5})?(\/[^\s]*)?$/
  
- 
+        let longExist = await urlModel.findOne({longUrl:data.longUrl})
+        if(longExist){
+            return res.status(400).send({status: false , message: "Short Url is already generated with this longUrl"})
+        }
+
    if (!urlPattern.test(data.longUrl)){
     return res.status(400).send({status: false , message: "Url is invalid"})
    }
- 
+
+
         let urlDecodedCode = shortid.generate()
         let shortDecodedUrl = "https://localhost:3000/"+urlDecodedCode
         data.shortUrl = shortDecodedUrl
@@ -37,16 +42,15 @@ const getUrl = async function(req,res){
 try{
         let code = req.params.urlCode
 
-        if(!shortid.isValid(code)){
-            return res.status(400).send({status:false,message:"Invalid Code"})
-        }
-
+        // if(!shortid.isValid(code)){
+        //     return res.status(400).send({status:false,message:"Invalid Code"})
+        // }
         let getLongUrl = await urlModel.findOne({urlCode:code}).select({_id:0,longUrl:1})
         if(!getLongUrl){
             return res.status(404).send({status:false,message:"No Url Found"})
         }
 
-        return res.status(302).send("Redirect to " + getLongUrl.longUrl)
+        return res.status(302).redirect( getLongUrl.longUrl)
     }
     catch(err){
         return res.status(500).send({status:false,message:err.message})
