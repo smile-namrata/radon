@@ -42,7 +42,7 @@ const createUrl = async function(req,res){
    }
 
 
-        let urlDecodedCode = shortid.generate()
+        let urlDecodedCode = shortid.generate().toLowerCase()
         let shortDecodedUrl = "http://localhost:3000/"+urlDecodedCode
         data.shortUrl = shortDecodedUrl
         data['urlCode'] = urlDecodedCode
@@ -59,18 +59,16 @@ const getUrl = async function(req,res){
 try{
         let urlCode = req.params.urlCode
         let cacheData = await GET_ASYNC(`${urlCode}`)
-        console.log(cacheData)
         if(cacheData){
-            res.redirect(cacheData)
+            res.status(302).redirect(JSON.parse(cacheData).longUrl)
         }
         else{
         let getLongUrl = await urlModel.findOne({urlCode:urlCode}).select({_id:0,longUrl:1})
-        console.log(getLongUrl)
         if(!getLongUrl){
             return res.status(404).send({status:false,message:"No Url Found"})
         }
-        await SET_ASYNC(`${urlCode}`, JSON.stringify(getLongUrl.longUrl))
-        return res.status(302).redirect( getLongUrl.longUrl)
+        await SET_ASYNC(`${urlCode}`, JSON.stringify(getLongUrl))
+         res.status(302).redirect( getLongUrl.longUrl)
     }
     }
     catch(err){
